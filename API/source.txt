@@ -1,0 +1,2 @@
+https://openweathermap.org/api
+http://www.geonames.org/export/web-services.html#srtm3 высота
