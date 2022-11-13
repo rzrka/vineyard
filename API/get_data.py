@@ -1,3 +1,5 @@
+import json
+
 import requests
 
 import datetime
@@ -5,10 +7,9 @@ import time
 
 from statistics import mean
 
-LAT, LNG = 45.247136, 34.191395  # стартовые координаты
-STEP_DIST = 0.000039  # шаг в градусах
-MAX_SIZE_X, MAX_SIZE_Y = (1000, 1000)  # размер карты
-
+LAT, LNG = 44.914533, 38.945518  # стартовые координаты
+STEP_DIST = 0.004  # шаг в градусах
+MAX_SIZE_X, MAX_SIZE_Y = (20000, 20000)  # размер карты,в метрах
 OPENWEATHER_API = 'bce77f6c2965bbb5b4b5a7281fc5971f'
 AGROMONITORING_API = '044c7d4cade46c7e721d5d149bd087c4'
 
@@ -86,16 +87,19 @@ def create_polygons(slat, slng):
             }
     return polygons
 
+def save_dataset(data):
+    with open('dataset.json', 'w') as f:
+        json.dump(data, f)
 
 def create_dataset():
     # Создание полигонов
     polygons = create_polygons(LAT, LNG)
-
+    save_dataset(polygons)
     # Наполнение полигонов погодными данными
     for polygon in polygons:
         polygons[polygon] |= weather_dataset(lat=polygon[0], lng=polygon[1])
         polygons[polygon] |= soil_dataset(lat=polygon[0], lng=polygon[1])
-        print(polygon)
+        print(polygons[polygon])
 
 
 create_dataset()
