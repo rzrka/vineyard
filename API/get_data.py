@@ -1,4 +1,6 @@
 import json
+import datetime
+import pickle
 
 import requests
 
@@ -8,7 +10,7 @@ import time
 from statistics import mean
 
 LAT, LNG = 44.914533, 38.945518  # стартовые координаты
-STEP_DIST = 0.004  # шаг в градусах
+STEP_DIST = {'degress': 0.002, 'meters': 125}  # 125м,  шаг в градусах
 MAX_SIZE_X, MAX_SIZE_Y = (20000, 20000)  # размер карты,в метрах
 OPENWEATHER_API = 'bce77f6c2965bbb5b4b5a7281fc5971f'
 AGROMONITORING_API = '044c7d4cade46c7e721d5d149bd087c4'
@@ -29,14 +31,57 @@ def weather_dataset(lat, lng):
     dataset = {}
     response = requests.get(url)
     data = response.json()['list']
-    dataset['temp'] = round(mean([x['main']['temp'] - 273.15 for x in data]), 2)  # Температура
-    dataset['pressure'] = round(mean([x['main']['pressure'] for x in data]), 2)  # Давление
-    dataset['humidity'] = round(mean([x['main']['humidity'] for x in data]), 2)  # Влажность
-    dataset['wind_speed'] = round(mean([x['wind']['speed'] for x in data]), 2)  # Скорость ветра
-    dataset['wind_gust'] = round(mean([x['wind']['gust'] for x in data]), 2)  # порыв ветра
-    dataset['clouds'] = round(mean([x['clouds']['all'] for x in data]), 2)  # облачность, %
-    dataset['weather'] = {''.join(tuple(l['description'] for l in j)) for j in
-                          [i['weather'] for i in data]}  # облачность, %
+
+    # Температура
+    temp = [x['main']['temp'] - 273.15 for x in data]
+    if not None in temp:
+        dataset['temp'] = round(mean([x for x in temp]), 2)
+    else:
+        dataset['temp'] = None
+
+    # Давление
+    pressure = [x['main'].get('pressure') for x in data]
+    if not None in pressure:
+        dataset['pressure'] = round(mean([x for x in pressure]), 2)
+    else:
+        dataset['pressure'] = None
+
+    # Влажность
+    humidity = [x['main'].get('humidity') for x in data]
+    if not None in humidity:
+        dataset['humidity'] = round(mean([x for x in humidity]), 2)
+    else:
+        dataset['humidity'] = None
+
+    # Скорость ветра
+    wind_speed = [x['wind'].get('speed') for x in data]
+    if not None in wind_speed:
+        dataset['wind_speed'] = round(mean([x for x in wind_speed]), 2)
+    else:
+        dataset['wind_speed'] = None
+
+    # порыв ветра
+    wind_gust = [x['wind'].get('gust') for x in data]
+    if not None in wind_gust:
+        dataset['wind_gust'] = round(mean([x for x in wind_gust]), 2)
+    else:
+        dataset['wind_gust'] = None
+
+    # облачность, %
+    clouds = [x['clouds'].get('all') for x in data]
+    if not None in clouds:
+        dataset['clouds'] = round(mean([x for x in clouds]), 2)
+    else:
+        dataset['clouds'] = None
+
+    # Тип погоды
+    weather = [i.get('weather') for i in data]
+    if not None in weather:
+        dataset['weather'] = {''.join(tuple(l.get('description') for l in j)) for j in
+                              weather}
+    else:
+        dataset['clouds'] = None
+
     return dataset
 
 
@@ -57,49 +102,65 @@ def soil_dataset(lat, lng):
     data_set = {}
     for layer in data['properties']['layers']:
         soil_data = {layer['name']: {}}
-        for value in layer['depths']:
-            soil_data[layer['name']][value['label']] = value['values']
+        value = layer['depths'][0]
+        soil_data[layer['name']][value['label']] = value['values'].get('mean')
         data_set |= soil_data
 
     return data_set
 
 
 def create_polygons(slat, slng):
+    '''
+    step - расстояние между центральными точками двух полигонов,
+    :param slat:
+    :param slng:
+    :return:
+    '''
     polygons = {}
-    step = int(STEP_DIST * 1000000 * 2)
+    stop_lat = slat - (MAX_SIZE_Y / STEP_DIST['meters']) * STEP_DIST['degress']
+    stop_lng = slng + (MAX_SIZE_X / STEP_DIST['meters']) * STEP_DIST['degress']
+    step = int(STEP_DIST['degress'] * 1000000 * 2)
+
     start_lat = int(slat * 1000000)
     start_lng = int(slng * 1000000)
-    stop_lat = start_lat + int(step * MAX_SIZE_Y)
-    stop_lng = start_lng + int(step * MAX_SIZE_X)
-    for lat in range(start_lat, stop_lat, step):
+    stop_lat = int(stop_lat * 1000000)
+    stop_lng = int(stop_lng * 1000000)
+
+    for lat in range(start_lat, stop_lat, -step):
         lat /= 1000000
         for lng in range(start_lng, stop_lng, step):
             lng /= 1000000
             polygons[(lat, lng)] = {
-                'x1': lng - STEP_DIST,
-                'y1': lat - STEP_DIST,
-                'x2': lng + STEP_DIST,
-                'y2': lat - STEP_DIST,
-                'x3': lng - STEP_DIST,
-                'y3': lat + STEP_DIST,
-                'x4': lng + STEP_DIST,
-                'y4': lat + STEP_DIST,
+                'x1': round(lng - STEP_DIST['degress'], 6),
+                'y1': round(lat - STEP_DIST['degress'], 6),
+                'x2': round(lng + STEP_DIST['degress'], 6),
+                'y2': round(lat - STEP_DIST['degress'], 6),
+                'x3': round(lng - STEP_DIST['degress'], 6),
+                'y3': round(lat + STEP_DIST['degress'], 6),
+                'x4': round(lng + STEP_DIST['degress'], 6),
+                'y4': round(lat + STEP_DIST['degress'], 6),
             }
     return polygons
 
 def save_dataset(data):
-    with open('dataset.json', 'w') as f:
-        json.dump(data, f)
+    with open('dataset.pickle', 'wb') as f:
+        pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+def set_default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    raise TypeError
+
 
 def create_dataset():
     # Создание полигонов
     polygons = create_polygons(LAT, LNG)
-    save_dataset(polygons)
     # Наполнение полигонов погодными данными
     for polygon in polygons:
         polygons[polygon] |= weather_dataset(lat=polygon[0], lng=polygon[1])
         polygons[polygon] |= soil_dataset(lat=polygon[0], lng=polygon[1])
         print(polygons[polygon])
+    save_dataset(polygons)
 
 
 create_dataset()
