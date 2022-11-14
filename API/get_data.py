@@ -143,7 +143,7 @@ def create_polygons(slat, slng):
     return polygons
 
 def save_dataset(data):
-    with open('dataset.pickle', 'wb') as f:
+    with open('../backend/polygons/datasets/dataset.pickle', 'wb') as f:
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 def set_default(obj):
@@ -154,13 +154,22 @@ def set_default(obj):
 
 def create_dataset():
     # Создание полигонов
-    polygons = create_polygons(LAT, LNG)
+    polygons_set = create_polygons(LAT, LNG)
     # Наполнение полигонов погодными данными
-    for polygon in polygons:
-        polygons[polygon] |= weather_dataset(lat=polygon[0], lng=polygon[1])
-        polygons[polygon] |= soil_dataset(lat=polygon[0], lng=polygon[1])
-        print(polygons[polygon])
-    save_dataset(polygons)
+    polygons = iter(polygons_set)
+    polygon = next(polygons)
+    while True:
+        try:
+            polygons_set[polygon] |= weather_dataset(lat=polygon[0], lng=polygon[1])
+            polygons_set[polygon] |= soil_dataset(lat=polygon[0], lng=polygon[1])
+            print(polygons_set[polygon])
+            polygon = next(polygons)
+        except StopIteration:
+            break
+        except:
+            print('timeout!')
+            time.sleep(1)
+    save_dataset(polygons_set)
 
 
 create_dataset()
