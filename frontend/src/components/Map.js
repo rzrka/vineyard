@@ -6,7 +6,7 @@ class Map extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            "polygons": '',
+            "polygons": [],
         }
     }
 
@@ -19,22 +19,17 @@ class Map extends React.Component {
                 "polygons": response.data,
               }
             )
-            console.log(this.state)
           }).catch(error => console.log(error))
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.load_data()
-        console.log(this.state)
     }
 
     render() {
         return (
             <div>
                 map
-                {this.state.polygons.map((polygon) =>
-                <p>{polygon.id}</p>
-                )} 
             </div>
         )
     }
