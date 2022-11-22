@@ -1,5 +1,5 @@
 import React from 'react'
-import Map from './components/Map'
+import VineyardMap from './components/VineyardMap'
 import {HashRouter, Route, Link, Redirect, Routes, BrowserRouter} from 'react-router-dom'
 
 
@@ -8,7 +8,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
       <Routes>
-      <Route exact path="/" element={<Map/>}/>
+      <Route exact path="/" element={<VineyardMap/>}/>
       </Routes>
       </BrowserRouter>
     </div>
