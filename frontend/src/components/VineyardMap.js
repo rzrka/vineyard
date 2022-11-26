@@ -49,9 +49,10 @@ class VineyardMap extends React.Component {
                     <div class="col-md-8 offset-md-2">
                     <Map defaultState={{ 
                         center: [this.state.polygons[0].y1, this.state.polygons[0].x1], zoom: 18}} 
-                        style={{width: "600px", height: "400px", margin: "auto"}}
+                        style={{width: "100%", height: "100%", margin: "auto"}}
                     >
-                        {this.state.polygons.map(polygon => 
+                        {this.state.polygons.map(polygon =>
+                            {polygon.score === 100 ?
                             <Polygon
                                 geometry={[[
                                     [polygon.y1, polygon.x1],
@@ -67,6 +68,23 @@ class VineyardMap extends React.Component {
                                 strokeStyle: 'solid' // тип границы квадрата
                                 }}
                             />
+                            :
+                            <Polygon
+                                geometry={[[
+                                    [polygon.y1, polygon.x1],
+                                    [polygon.y3, polygon.x3],
+                                    [polygon.y4, polygon.x4],
+                                    [polygon.y2, polygon.x2],
+                                ]]} 
+                                options={{
+                                fillColor: '#ff0000', // цвет квадрата
+                                strokeColor: '#000000', // цвет границы квадрата
+                                opacity: 0.6, // прозрачность квадрата
+                                strokeWidth: 5, // толщина границы квадрата
+                                strokeStyle: 'solid' // тип границы квадрата
+                                }}
+                            />
+                        }
                         )}
                     </Map>
                     </div>

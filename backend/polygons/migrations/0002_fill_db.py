@@ -1,11 +1,13 @@
 from django.db import migrations
+from django.conf import settings
 import pickle
+import os
 
 
 def forwards_func(apps, schema_editor):
     polygons_model = apps.get_model("polygons", "Polygons")  # Load model for make changes
     pk = 1
-    with open('polygons/datasets/dataset.pickle', 'rb') as f:
+    with open(os.path.join(settings.BASE_DIR, 'polygons/datasets/dataset.pickle'), 'rb') as f:
         data = pickle.load(f)
         for key, values in data.items():
             polygons_model.objects.create(
@@ -38,6 +40,7 @@ def forwards_func(apps, schema_editor):
                 sand=values['sand']['0-5cm'],
                 silt=values['silt']['0-5cm'],
                 soc=values['soc']['0-5cm'],
+                score=100 if values['bdod']['0-5cm'] else 0
             )
             pk += 1
     del polygons_model  # Delete link for category
