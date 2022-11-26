@@ -1,7 +1,8 @@
 import json
 import datetime
 import pickle
-
+from geopy.distance import Distance
+from geopy.units import degrees, nautical
 import requests
 
 import datetime
@@ -10,7 +11,14 @@ import time
 from statistics import mean
 
 LAT, LNG = 44.914533, 38.945518  # стартовые координаты
-STEP_DIST = {'degress': 0.002, 'meters': 125}  # 125м,  шаг в градусах
+
+def get_degress(meter):
+    rough_distance = degrees(arcminutes=nautical(meters=meter))
+    return {'degress': round(rough_distance, 6), 'meters': meter}
+
+STEP_DIST = get_degress(125)  # 125м,  шаг в градусах
+
+
 MAX_SIZE_X, MAX_SIZE_Y = (20000, 20000)  # размер карты,в метрах
 OPENWEATHER_API = 'bce77f6c2965bbb5b4b5a7281fc5971f'
 AGROMONITORING_API = '044c7d4cade46c7e721d5d149bd087c4'
@@ -143,13 +151,8 @@ def create_polygons(slat, slng):
     return polygons
 
 def save_dataset(data):
-    with open('../backend/polygons/datasets/dataset.pickle', 'wb') as f:
+    with open('../backend/polygons/datasets/dataset2.pickle', 'wb') as f:
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
-
-def set_default(obj):
-    if isinstance(obj, set):
-        return list(obj)
-    raise TypeError
 
 
 def create_dataset():
