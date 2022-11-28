@@ -1,0 +1,36 @@
+.polygon-detail {
+    position: fixed;
+    width: 25%;
+    height: 100vw;
+    top: 0;
+    right: 0;
+    transform: translateX(130%);
+    transition: all 0.2s;
+}
+
+.polygon-detail.active {
+    transform: translateX(0);
+}
+
+.menu__content {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.s;
+}
+
+.polygon-li {
+    color: black;
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.polygon-ul {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}

@@ -7,7 +7,7 @@ import os
 def forwards_func(apps, schema_editor):
     polygons_model = apps.get_model("polygons", "Polygons")  # Load model for make changes
     pk = 1
-    with open(os.path.join(settings.BASE_DIR, 'polygons/datasets/dataset.pickle'), 'rb') as f:
+    with open(os.path.join(settings.BASE_DIR, 'polygons/datasets/dataset2.pickle'), 'rb') as f:
         data = pickle.load(f)
         for key, values in data.items():
             polygons_model.objects.create(

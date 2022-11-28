@@ -155,6 +155,12 @@ def save_dataset(data):
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
+def get_object(lat, lng):
+    url = f"http://geocode-maps.yandex.ru/1.x/?geocode={lat},{lng}"
+    response = requests.get(url)
+    data = response.json()
+    print(data)
+
 def create_dataset():
     # Создание полигонов
     polygons_set = create_polygons(LAT, LNG)
@@ -163,6 +169,7 @@ def create_dataset():
     polygon = next(polygons)
     while True:
         try:
+            get_object(44.881075, 39.200709)
             polygons_set[polygon] |= weather_dataset(lat=polygon[0], lng=polygon[1])
             polygons_set[polygon] |= soil_dataset(lat=polygon[0], lng=polygon[1])
             print(polygons_set[polygon])

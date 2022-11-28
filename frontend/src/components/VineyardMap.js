@@ -1,6 +1,7 @@
 import React from 'react'
 import axios from 'axios';
-import { YMaps, Map, Rectangle, Polyline, Polygon } from "react-yandex-maps";
+import { YMaps, Map, Polygon } from "react-yandex-maps";
+import PolygonDetail from './PolygonDetail';
 
 
 class VineyardMap extends React.Component {
@@ -15,7 +16,7 @@ class VineyardMap extends React.Component {
         this.state = {
             "polygons": [],
             "center": [],
-            'data_loaded': false,
+            "curPolygon": ''
         }
     }
 
@@ -24,10 +25,8 @@ class VineyardMap extends React.Component {
             {
               "polygons": data,
               "center": this.getCenter(data),
-              "data_loaded": true,
             }
           )
-        console.log(this.state.polygons[0])
     }
 
     load_data() {
@@ -41,18 +40,46 @@ class VineyardMap extends React.Component {
         this.load_data()
     }
     
+    polyginDetailBtn(polygon) {
+        this.setState(
+            {
+                "curPolygon": polygon
+            }
+        )
+        console.log(this.state.curPolygon)
+    }
+
     render() {
         return (
-            <div class="row">
-                {this.state.data_loaded &&
+            <div className="row">
+                {this.state.polygons.length != 0 &&
                 <YMaps>
-                    <div class="col-md-8 offset-md-2">
+                    <div className="col-md-8 offset-md-2">
                     <Map defaultState={{ 
                         center: [this.state.polygons[0].y1, this.state.polygons[0].x1], zoom: 18}} 
-                        style={{width: "100%", height: "100%", margin: "auto"}}
+                        style={{width: "100%", height: "1200px", margin: "auto"}}
+                        onClick={() => this.setState({"curPolygon": ''})}
                     >
+                        {/* <Polygon
+                                geometry={[[
+                                    [this.state.polygons[0].y1, this.state.polygons[0].x1],
+                                    [this.state.polygons[0].y3, this.state.polygons[0].x3],
+                                    [this.state.polygons[0].y4, this.state.polygons[0].x4],
+                                    [this.state.polygons[0].y2, this.state.polygons[0].x2],
+                                ]]} 
+                                options={{
+                                fillColor: '#46ff00', // цвет квадрата
+                                strokeColor: '#000000', // цвет границы квадрата
+                                opacity: 0.6, // прозрачность квадрата
+                                strokeWidth: 5, // толщина границы квадрата
+                                strokeStyle: 'solid' // тип границы квадрата
+                                }}
+                                onClick={() => this.polyginDetailBtn(this.state.polygons[0])}
+                            /> */}
+                        
                         {this.state.polygons.map(polygon =>
-                            {polygon.score === 100 ?
+                            <div key={polygon.id}>
+                            {polygon.score == 100 ?
                             <Polygon
                                 geometry={[[
                                     [polygon.y1, polygon.x1],
@@ -63,10 +90,11 @@ class VineyardMap extends React.Component {
                                 options={{
                                 fillColor: '#46ff00', // цвет квадрата
                                 strokeColor: '#000000', // цвет границы квадрата
-                                opacity: 0.6, // прозрачность квадрата
+                                opacity: 0.2, // прозрачность квадрата
                                 strokeWidth: 5, // толщина границы квадрата
                                 strokeStyle: 'solid' // тип границы квадрата
                                 }}
+                                onClick={() => this.polyginDetailBtn(polygon)}
                             />
                             :
                             <Polygon
@@ -79,17 +107,20 @@ class VineyardMap extends React.Component {
                                 options={{
                                 fillColor: '#ff0000', // цвет квадрата
                                 strokeColor: '#000000', // цвет границы квадрата
-                                opacity: 0.6, // прозрачность квадрата
+                                opacity: 0.2, // прозрачность квадрата
                                 strokeWidth: 5, // толщина границы квадрата
                                 strokeStyle: 'solid' // тип границы квадрата
                                 }}
+                                onClick={() => this.polyginDetailBtn(polygon)}
                             />
-                        }
+                            }
+                            </div>
                         )}
                     </Map>
                     </div>
                 </YMaps>
                 }
+            <PolygonDetail polygon={this.state.curPolygon}/>
             </div>
         )
     }
