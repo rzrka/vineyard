@@ -1,6 +1,9 @@
 import json
 import datetime
 import pickle
+import urllib
+
+import urllib3
 from geopy.distance import Distance
 from geopy.units import degrees, nautical
 import requests
@@ -154,12 +157,12 @@ def save_dataset(data):
     with open('../backend/polygons/datasets/dataset2.pickle', 'wb') as f:
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-
-def get_object(lat, lng):
-    url = f"http://geocode-maps.yandex.ru/1.x/?geocode={lat},{lng}"
-    response = requests.get(url)
-    data = response.json()
-    print(data)
+def get_elevation(lat, lng) -> dict:
+    # получение высоты
+    query = ('https://api.open-elevation.com/api/v1/lookup'
+             f'?locations={lat},{lng}')
+    elevation = requests.get(query).json()['results'][0]['elevation']
+    return {'elevation': elevation}
 
 def create_dataset():
     # Создание полигонов
@@ -169,7 +172,7 @@ def create_dataset():
     polygon = next(polygons)
     while True:
         try:
-            get_object(44.881075, 39.200709)
+            polygons_set[polygon] |= get_elevation(lat=polygon[0], lng=polygon[1])
             polygons_set[polygon] |= weather_dataset(lat=polygon[0], lng=polygon[1])
             polygons_set[polygon] |= soil_dataset(lat=polygon[0], lng=polygon[1])
             print(polygons_set[polygon])
