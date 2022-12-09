@@ -13,6 +13,7 @@ class Polygons(models.Model):
     y3 = models.FloatField(verbose_name="нижний правый угол", null=True)
     x4 = models.FloatField(verbose_name="нижний левый угол", null=True)
     y4 = models.FloatField(verbose_name="нижний левый угол", null=True)
+    elevation = models.IntegerField(null=True)
     temp = models.FloatField(verbose_name="температура", null=True)
     pressure = models.FloatField(verbose_name="давление", null=True)
     humidity = models.FloatField(verbose_name="влажность", null=True)

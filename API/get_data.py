@@ -13,8 +13,8 @@ import time
 
 from statistics import mean
 
-LAT, LNG = 44.914533, 38.945518  # стартовые координаты
-
+# LAT, LNG = 44.914533, 38.945518  # стартовые координаты
+LAT, LNG = 44.652361, 7.939853
 def get_degress(meter):
     rough_distance = degrees(arcminutes=nautical(meters=meter))
     return {'degress': round(rough_distance, 6), 'meters': meter}
@@ -22,7 +22,7 @@ def get_degress(meter):
 STEP_DIST = get_degress(125)  # 125м,  шаг в градусах
 
 
-MAX_SIZE_X, MAX_SIZE_Y = (20000, 20000)  # размер карты,в метрах
+MAX_SIZE_X, MAX_SIZE_Y = (6000, 8000)  # размер карты,в метрах
 OPENWEATHER_API = 'bce77f6c2965bbb5b4b5a7281fc5971f'
 AGROMONITORING_API = '044c7d4cade46c7e721d5d149bd087c4'
 
@@ -154,7 +154,7 @@ def create_polygons(slat, slng):
     return polygons
 
 def save_dataset(data):
-    with open('../backend/polygons/datasets/dataset2.pickle', 'wb') as f:
+    with open('../backend/polygons/datasets/vineyard6.pickle', 'wb') as f:
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 def get_elevation(lat, lng) -> dict:
@@ -179,8 +179,8 @@ def create_dataset():
             polygon = next(polygons)
         except StopIteration:
             break
-        except:
-            print('timeout!')
+        except Exception as e:
+            print(e)
             time.sleep(1)
     save_dataset(polygons_set)
 

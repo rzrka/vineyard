@@ -22,6 +22,7 @@ def forwards_func(apps, schema_editor):
                 y3=values['y3'],
                 x4=values['x4'],
                 y4=values['y4'],
+                elevation=values['elevation'],
                 temp=values['temp'],
                 pressure=values['pressure'],
                 humidity=values['humidity'],
