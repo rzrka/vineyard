@@ -182,7 +182,27 @@ def create_dataset():
         except Exception as e:
             print(e)
             time.sleep(1)
+    calc_degrees(polygons_set)
     save_dataset(polygons_set)
 
 
-create_dataset()
+def calc_degrees(polygons):
+    for polygon in polygons:
+        neighbor_poligons = [
+            (polygon[0], round(polygon[1] + (STEP_DIST['degress'] * 2), 6)),
+            (polygon[0], round(polygon[1] - (STEP_DIST['degress'] * 2), 6)),
+            (round(polygon[0] + (STEP_DIST['degress'] * 2), 6), polygon[1]),
+            (round(polygon[0] - (STEP_DIST['degress'] * 2), 6), polygon[1]),
+
+        ]
+        for neighbor_poligon in neighbor_poligons:
+            try:
+                cur_neighbor = polygons[neighbor_poligon]
+            except KeyError:
+                pass
+
+
+with open('../backend/polygons/datasets/dataset.pickle', 'rb') as f:
+    data = pickle.load(f)
+    calc_degrees(data)
+# create_dataset()
