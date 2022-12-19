@@ -7,7 +7,7 @@ import os
 def forwards_func(apps, schema_editor):
     polygons_model = apps.get_model("polygons", "Polygons")  # Load model for make changes
     pk = 1
-    with open(os.path.join(settings.BASE_DIR, 'polygons/datasets/vineyard6.pickle'), 'rb') as f:
+    with open(os.path.join(settings.BASE_DIR, 'polygons/datasets/dataset.pickle'), 'rb') as f:
         data = pickle.load(f)
         for key, values in data.items():
             polygons_model.objects.create(
@@ -23,6 +23,7 @@ def forwards_func(apps, schema_editor):
                 x4=values['x4'],
                 y4=values['y4'],
                 elevation=values['elevation'],
+                inclination=values['inclination'],
                 temp=values['temp'],
                 pressure=values['pressure'],
                 humidity=values['humidity'],

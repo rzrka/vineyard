@@ -8,13 +8,14 @@ from geopy.distance import Distance
 from geopy.units import degrees, nautical
 import requests
 
+import math
 import datetime
 import time
 
 from statistics import mean
 
-# LAT, LNG = 44.914533, 38.945518  # стартовые координаты
-LAT, LNG = 44.652361, 7.939853
+LAT, LNG = 44.914533, 38.945518  # стартовые координаты
+# LAT, LNG = 44.652361, 7.939853
 def get_degress(meter):
     rough_distance = degrees(arcminutes=nautical(meters=meter))
     return {'degress': round(rough_distance, 6), 'meters': meter}
@@ -22,7 +23,7 @@ def get_degress(meter):
 STEP_DIST = get_degress(125)  # 125м,  шаг в градусах
 
 
-MAX_SIZE_X, MAX_SIZE_Y = (6000, 8000)  # размер карты,в метрах
+MAX_SIZE_X, MAX_SIZE_Y = (10000, 10000)  # размер карты,в метрах
 OPENWEATHER_API = 'bce77f6c2965bbb5b4b5a7281fc5971f'
 AGROMONITORING_API = '044c7d4cade46c7e721d5d149bd087c4'
 
@@ -154,14 +155,16 @@ def create_polygons(slat, slng):
     return polygons
 
 def save_dataset(data):
-    with open('../backend/polygons/datasets/vineyard6.pickle', 'wb') as f:
+    with open('../backend/polygons/datasets/dataset.pickle', 'wb') as f:
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 def get_elevation(lat, lng) -> dict:
     # получение высоты
-    query = ('https://api.open-elevation.com/api/v1/lookup'
-             f'?locations={lat},{lng}')
-    elevation = requests.get(query).json()['results'][0]['elevation']
+    API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxabmVtOU40dEVkV2xlWGhFV2txbHBJcXFFS0pnIiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxOS1FLOUFCSUVrekVENVVaMHFOZVJUbGRxUU0iLCJvcmdhbml6YXRpb25faWQiOiJkZXZlbG9wZXJ8TGJiZ2J2d2hPMmd5b3Z1RERRMjdZSFduZEpiQSIsImlhdCI6MTY3MTQ1MjY0OH0.BT_o_E-8oXbn7T0inrRGvKScXtCpWq8hhAvtVrlInJU"
+    url = f"https://api.airmap.com/elevation/v1/ele/?points={lat},{lng}"
+    request = requests.get(url, headers={'X-API-Key': API_KEY})
+    response = request.json()
+    elevation = response['data'][0]
     return {'elevation': elevation}
 
 def create_dataset():
@@ -182,12 +185,13 @@ def create_dataset():
         except Exception as e:
             print(e)
             time.sleep(1)
-    calc_degrees(polygons_set)
+    polygons_set = calc_degrees(polygons_set)
     save_dataset(polygons_set)
 
 
 def calc_degrees(polygons):
     for polygon in polygons:
+        polygon_degress = 0
         neighbor_poligons = [
             (polygon[0], round(polygon[1] + (STEP_DIST['degress'] * 2), 6)),
             (polygon[0], round(polygon[1] - (STEP_DIST['degress'] * 2), 6)),
@@ -199,10 +203,16 @@ def calc_degrees(polygons):
             try:
                 cur_neighbor = polygons[neighbor_poligon]
             except KeyError:
-                pass
+                continue
+            height = abs(polygons[polygon]['elevation'] - cur_neighbor['elevation'])
+            b = STEP_DIST['meters']
+            result = math.degrees(math.atan(height/b))
+            if result > polygon_degress:
+                polygon_degress = result
+        polygons[polygon]['inclination'] = polygon_degress
+    return polygons
 
 
-with open('../backend/polygons/datasets/dataset.pickle', 'rb') as f:
-    data = pickle.load(f)
-    calc_degrees(data)
-# create_dataset()
+
+
+create_dataset()
