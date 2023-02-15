@@ -2,7 +2,7 @@ import json
 import datetime
 import pickle
 import urllib
-
+import os
 import urllib3
 from geopy.distance import Distance
 from geopy.units import degrees, nautical
@@ -15,31 +15,34 @@ import time
 from statistics import mean
 
 LAT, LNG = 44.914533, 38.945518  # стартовые координаты
+
+
 # LAT, LNG = 44.652361, 7.939853
 def get_degress(meter):
     rough_distance = degrees(arcminutes=nautical(meters=meter))
     return {'degress': round(rough_distance, 6), 'meters': meter}
 
+
 STEP_DIST = get_degress(125)  # 125м,  шаг в градусах
 
-
 MAX_SIZE_X, MAX_SIZE_Y = (10000, 10000)  # размер карты,в метрах
-OPENWEATHER_API = 'bce77f6c2965bbb5b4b5a7281fc5971f'
-AGROMONITORING_API = '044c7d4cade46c7e721d5d149bd087c4'
+os.environ['OPENWEATHER_API'] = 'bce77f6c2965bbb5b4b5a7281fc5971f'
+os.environ[
+    'ELEVATION_API'] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxabmVtOU40dEVkV2xlWGhFV2txbHBJcXFFS0pnIiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxOS1FLOUFCSUVrekVENVVaMHFOZVJUbGRxUU0iLCJvcmdhbml6YXRpb25faWQiOiJkZXZlbG9wZXJ8TGJiZ2J2d2hPMmd5b3Z1RERRMjdZSFduZEpiQSIsImlhdCI6MTY3MTQ1MjY0OH0.BT_o_E-8oXbn7T0inrRGvKScXtCpWq8hhAvtVrlInJU"
 
 # Временной промежуток за которой берутся данные
 START_DATE = int(time.mktime(datetime.datetime.strptime('2022-07-01', "%Y-%m-%d").timetuple()))
 END_DATE = int(time.mktime(datetime.datetime.strptime('2022-07-08', "%Y-%m-%d").timetuple()))
 
 
-def weather_dataset(lat, lng):
+def weather_dataset(lat: float, lng: float) -> dict:
     """
     Получение почвеных данных
     :param lat: float, широта
     :param lng: float, долгота
     :return: dict
         """
-    url = f"https://history.openweathermap.org/data/2.5/history/city?lat={lat}&lon={lng}&type=hour&start={START_DATE}&end={END_DATE}&appid={OPENWEATHER_API}"
+    url = f"https://history.openweathermap.org/data/2.5/history/city?lat={lat}&lon={lng}&type=hour&start={START_DATE}&end={END_DATE}&appid={os.environ['OPENWEATHER_API']}"
     dataset = {}
     response = requests.get(url)
     data = response.json()['list']
@@ -97,7 +100,7 @@ def weather_dataset(lat, lng):
     return dataset
 
 
-def soil_dataset(lat, lng):
+def soil_dataset(lat: float, lng: float) -> dict:
     """
     Получение почвеных данных
     :param lat: float, широта
@@ -121,12 +124,17 @@ def soil_dataset(lat, lng):
     return data_set
 
 
-def create_polygons(slat, slng):
+def create_polygons(slat: float, slng: float) -> {(tuple, tuple): dict}:
     '''
     step - расстояние между центральными точками двух полигонов,
     :param slat:
     :param slng:
     :return:
+        {
+        (1,1: 2,1): {x1: 1, y1: 1, ...},
+        (1,2: 2,2): {},
+        ...
+        }
     '''
     polygons = {}
     stop_lat = slat - (MAX_SIZE_Y / STEP_DIST['meters']) * STEP_DIST['degress']
@@ -154,23 +162,29 @@ def create_polygons(slat, slng):
             }
     return polygons
 
-def save_dataset(data):
+
+def save_dataset(data: dict) -> None:
+    """
+    Сохранение датасет в pickle
+    :param data:
+    :return:
+    """
     with open('../backend/polygons/datasets/dataset.pickle', 'wb') as f:
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-def get_elevation(lat, lng) -> dict:
+
+def get_elevation(lat: float, lng: float) -> {str: int}:
     # получение высоты
-    API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxabmVtOU40dEVkV2xlWGhFV2txbHBJcXFFS0pnIiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxOS1FLOUFCSUVrekVENVVaMHFOZVJUbGRxUU0iLCJvcmdhbml6YXRpb25faWQiOiJkZXZlbG9wZXJ8TGJiZ2J2d2hPMmd5b3Z1RERRMjdZSFduZEpiQSIsImlhdCI6MTY3MTQ1MjY0OH0.BT_o_E-8oXbn7T0inrRGvKScXtCpWq8hhAvtVrlInJU"
     url = f"https://api.airmap.com/elevation/v1/ele/?points={lat},{lng}"
-    request = requests.get(url, headers={'X-API-Key': API_KEY})
+    request = requests.get(url, headers={'X-API-Key': os.environ['ELEVATION_API']})
     response = request.json()
     elevation = response['data'][0]
     return {'elevation': elevation}
 
+
 def create_dataset():
     # Создание полигонов
     polygons_set = create_polygons(LAT, LNG)
-    # Наполнение полигонов погодными данными
     polygons = iter(polygons_set)
     polygon = next(polygons)
     while True:
@@ -189,7 +203,8 @@ def create_dataset():
     save_dataset(polygons_set)
 
 
-def calc_degrees(polygons):
+def calc_degrees(polygons: dict) -> dict:
+    """Расчет угла наклона"""
     for polygon in polygons:
         polygon_degress = 0
         neighbor_poligons = [
@@ -206,13 +221,11 @@ def calc_degrees(polygons):
                 continue
             height = abs(polygons[polygon]['elevation'] - cur_neighbor['elevation'])
             b = STEP_DIST['meters']
-            result = math.degrees(math.atan(height/b))
+            result = math.degrees(math.atan(height / b))
             if result > polygon_degress:
                 polygon_degress = result
         polygons[polygon]['inclination'] = polygon_degress
     return polygons
-
-
 
 
 create_dataset()
