@@ -169,7 +169,7 @@ def save_dataset(data: dict) -> None:
     :param data:
     :return:
     """
-    with open('../backend/polygons/datasets/dataset.pickle', 'wb') as f:
+    with open('../ml/datasets/dataset.pickle', 'wb') as f:
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
