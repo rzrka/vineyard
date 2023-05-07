@@ -33,7 +33,7 @@ class Polygons(models.Model):
     sand = models.IntegerField(null=True)
     silt = models.IntegerField(null=True)
     soc = models.IntegerField(null=True)
-    score = models.FloatField(default=0.0)
+    score = models.FloatField(default=0.0, null=True)
 
     class Meta:
         constraints = [

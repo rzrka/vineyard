@@ -4,3 +4,6 @@ docker run --name postgres -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWO
 
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
+
+
+jupyter notebook .\ml\ml.ipynb

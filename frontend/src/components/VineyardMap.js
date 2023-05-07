@@ -29,6 +29,34 @@ class VineyardMap extends React.Component {
           )
     }
 
+    componentToHex(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+      }
+      
+    rgbToHex(r, g, b) {
+        return "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
+      }
+
+    getColor(score) {
+        // let r
+        // let g
+        // if (score >= 50) {
+        //     g = 255
+        //     r = 255 - Math.ceil((score - 50) * 2.55 * 2)
+        // }
+        // else {
+        //     g = Math.ceil(score * 2.55 * 2)
+        //     r = 255
+        // }
+        // console.log('r - ' + r)
+        // console.log('g - ' + g)
+        let r = Math.ceil(255 * (1 - score / 100))
+        let g = Math.ceil(255 * score / 100)
+        let color = this.rgbToHex(r,g,0)
+        return color
+    }
+
     load_data() {
         axios.get('http://127.0.0.1:8000/polygons')
         .then(response => {
@@ -79,7 +107,6 @@ class VineyardMap extends React.Component {
                         
                         {this.state.polygons.map(polygon =>
                             <div key={polygon.id}>
-                            {polygon.score == 100 ?
                             <Polygon
                                 geometry={[[
                                     [polygon.y1, polygon.x1],
@@ -88,7 +115,7 @@ class VineyardMap extends React.Component {
                                     [polygon.y2, polygon.x2],
                                 ]]} 
                                 options={{
-                                fillColor: '#46ff00', // цвет квадрата
+                                fillColor: this.getColor(polygon.score), // цвет квадрата
                                 strokeColor: '#000000', // цвет границы квадрата
                                 opacity: 0.2, // прозрачность квадрата
                                 strokeWidth: 5, // толщина границы квадрата
@@ -96,24 +123,6 @@ class VineyardMap extends React.Component {
                                 }}
                                 onClick={() => this.polyginDetailBtn(polygon)}
                             />
-                            :
-                            <Polygon
-                                geometry={[[
-                                    [polygon.y1, polygon.x1],
-                                    [polygon.y3, polygon.x3],
-                                    [polygon.y4, polygon.x4],
-                                    [polygon.y2, polygon.x2],
-                                ]]} 
-                                options={{
-                                fillColor: '#ff0000', // цвет квадрата
-                                strokeColor: '#000000', // цвет границы квадрата
-                                opacity: 0.2, // прозрачность квадрата
-                                strokeWidth: 5, // толщина границы квадрата
-                                strokeStyle: 'solid' // тип границы квадрата
-                                }}
-                                onClick={() => this.polyginDetailBtn(polygon)}
-                            />
-                            }
                             </div>
                         )}
                     </Map>
