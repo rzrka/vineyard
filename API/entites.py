@@ -501,7 +501,7 @@ class PolygonScoredState(PolygonsBase):
         df = pd.concat([df, series_score, lat_lng, db_attr], axis=1)
         df = df.replace({np.nan: None})
 
-        # изменение оценак по фичам
+        # изменение оценок по фичам
         self.score_feather_inclination(df)
 
         # сохранение полигонов

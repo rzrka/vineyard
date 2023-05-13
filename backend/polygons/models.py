@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+
 # Create your models here.
 class Polygons(models.Model):
     lat = models.FloatField(verbose_name="широта", null=True)
@@ -15,6 +16,7 @@ class Polygons(models.Model):
     y4 = models.FloatField(verbose_name="нижний левый угол", null=True)
     elevation = models.IntegerField(verbose_name="высота", null=True)
     inclination = models.FloatField(verbose_name="максимальный угол наклона", null=True)
+    # Погода
     temp = models.FloatField(verbose_name="температура", null=True)
     pressure = models.FloatField(verbose_name="давление", null=True)
     humidity = models.FloatField(verbose_name="влажность", null=True)
@@ -22,18 +24,20 @@ class Polygons(models.Model):
     wind_gust = models.FloatField(verbose_name="порыв ветра", null=True)
     clouds = models.FloatField(verbose_name="облачность", null=True)
     weather = ArrayField(models.CharField(max_length=200, verbose_name="тип погоды", null=True), blank=True, null=True)
-    bdod = models.IntegerField(null=True)
-    cec = models.IntegerField(null=True)
-    cfvo = models.IntegerField(null=True)
-    clay = models.IntegerField(null=True)
-    nitrogen = models.IntegerField(null=True)
-    ocd = models.IntegerField(null=True)
-    ocs = models.IntegerField(null=True)
-    phh2o = models.IntegerField(null=True)
-    sand = models.IntegerField(null=True)
-    silt = models.IntegerField(null=True)
-    soc = models.IntegerField(null=True)
-    score = models.FloatField(default=0.0, null=True)
+    # Почва
+    bdod = models.IntegerField(verbose_name="Объемная плотность", null=True)
+    cec = models.IntegerField(verbose_name="Катионный обмен", null=True)
+    cfvo = models.IntegerField(verbose_name="Крупные фрагменты", null=True)
+    clay = models.IntegerField(verbose_name="Кол-во глины", null=True)
+    nitrogen = models.IntegerField(verbose_name="Нитрогены", null=True)
+    ocd = models.IntegerField(verbose_name="Плотность органического углерода", null=True)
+    ocs = models.IntegerField(verbose_name="Запас органического углерода", null=True)
+    phh2o = models.IntegerField(verbose_name="рН", null=True)
+    sand = models.IntegerField(verbose_name="Кол-во песка", null=True)
+    silt = models.IntegerField(verbose_name="Кол-во ила", null=True)
+    soc = models.IntegerField(verbose_name="Концентрация органического углерода", null=True)
+    # скоринг
+    score = models.FloatField(verbose_name="скоринг", default=0.0, null=True)
 
     class Meta:
         constraints = [
