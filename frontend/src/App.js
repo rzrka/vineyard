@@ -1,6 +1,6 @@
 import React from 'react'
 import VineyardMap from './components/VineyardMap'
-import {HashRouter, Route, Link, Redirect, Routes, BrowserRouter} from 'react-router-dom'
+import {Route, Routes, BrowserRouter} from 'react-router-dom'
 
 
 function App() {
@@ -8,6 +8,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
       <Routes>
+        {/* указывается какой компонент будет доступен по заданному пути */}
       <Route exact path="/" element={<VineyardMap/>}/>
       </Routes>
       </BrowserRouter>

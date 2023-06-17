@@ -12,6 +12,9 @@ class PolygonsModelViewSet(ViewSet):
     permission_classes = [permissions.AllowAny]
 
     def list(self, request):
+        # получение всех полигонов
         polygons = Polygons.objects.all()
+        # сериализации плигонов
         serializer = PolygonsSerializer(polygons, many=True)
         return Response(serializer.data)
+

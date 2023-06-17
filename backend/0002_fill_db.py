@@ -6,9 +6,12 @@ import os
 
 def forwards_func(apps, schema_editor):
     polygons_model = apps.get_model("polygons", "Polygons")  # Load model for make changes
+    # значение первичного ключа
     pk = 1
+    # чтение файла
     with open(os.path.join(settings.BASE_DIR, '../ml/datasets/vineyard6.pickle'), 'rb') as f:
         data = pickle.load(f)
+        # запись данных из файла в бд
         for key, values in data.items():
             polygons_model.objects.create(
                 pk=pk,

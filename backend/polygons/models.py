@@ -45,3 +45,4 @@ class Polygons(models.Model):
                 fields=['lat', 'lng'], name='unique_migration_host_combination'
             )
         ]
+

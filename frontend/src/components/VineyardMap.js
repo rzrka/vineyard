@@ -6,21 +6,27 @@ import PolygonDetail from './PolygonDetail';
 
 class VineyardMap extends React.Component {
     
-    getCenter(data) {
-        let center = data[data.length/2]
-        return [center.lat, center.lng]
-    }
-
     constructor(props) {
         super(props);
         this.state = {
+            // набор полигонов
             "polygons": [],
+            // центральный полигон
             "center": [],
+            // выбранный полигон
             "curPolygon": ''
         }
     }
 
+    getCenter(data) {
+        // определение центрального полигона
+        let center = data[data.length/2]
+        // возвращает долготу и широту
+        return [center.lat, center.lng]
+    }
+    
     setData(data){
+        // сохранения данных от бэкенда на фронтенд
         this.setState(
             {
               "polygons": data,
@@ -30,83 +36,66 @@ class VineyardMap extends React.Component {
     }
 
     componentToHex(c) {
+        // парсинг строки hex
         var hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
       }
       
     rgbToHex(r, g, b) {
+        // преобразование значения rgb в значения hex для цветного отображения полигона
         return "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
       }
 
     getColor(score) {
-        // let r
-        // let g
-        // if (score >= 50) {
-        //     g = 255
-        //     r = 255 - Math.ceil((score - 50) * 2.55 * 2)
-        // }
-        // else {
-        //     g = Math.ceil(score * 2.55 * 2)
-        //     r = 255
-        // }
-        // console.log('r - ' + r)
-        // console.log('g - ' + g)
+        // получение значения красного в цвета в зависимости от скоринга
         let r = Math.ceil(255 * (1 - score / 100))
+        // получение значения зеленого в цвета в зависимости от скоринга
         let g = Math.ceil(255 * score / 100)
+        // преобразование цвета rgb в hex
         let color = this.rgbToHex(r,g,0)
         return color
     }
 
     load_data() {
-        axios.get('http://127.0.0.1:8000/polygons')
+        // отправка гет запрос на бэкенд приложения
+        axios.get('http://127.0.0.1:8000/polygons/')
         .then(response => {
+            // при успешном запросе, ответ отправляется в метод для сохранения наборов
             this.setData(response.data)
           }).catch(error => console.log(error))
     }
 
     componentDidMount() {
+        // метод выполняется каждый раз при загрузке страницы
         this.load_data()
     }
     
     polyginDetailBtn(polygon) {
+        // сохранения выбранного полигона в состояние страницы
         this.setState(
             {
                 "curPolygon": polygon
             }
         )
-        console.log(this.state.curPolygon)
     }
 
     render() {
         return (
             <div className="row">
+                {/* если в состояние загружены полигоны, то отрисовывается компонент карты */}
                 {this.state.polygons.length != 0 &&
                 <YMaps>
                     <div className="col-md-8 offset-md-2">
+                        {/* комоненты карты для отображения карты на страницы с заданными настройками */}
                     <Map defaultState={{ 
                         center: [this.state.polygons[0].y1, this.state.polygons[0].x1], zoom: 18}} 
                         style={{width: "100%", height: "1200px", margin: "auto"}}
                         onClick={() => this.setState({"curPolygon": ''})}
                     >
-                        {/* <Polygon
-                                geometry={[[
-                                    [this.state.polygons[0].y1, this.state.polygons[0].x1],
-                                    [this.state.polygons[0].y3, this.state.polygons[0].x3],
-                                    [this.state.polygons[0].y4, this.state.polygons[0].x4],
-                                    [this.state.polygons[0].y2, this.state.polygons[0].x2],
-                                ]]} 
-                                options={{
-                                fillColor: '#46ff00', // цвет квадрата
-                                strokeColor: '#000000', // цвет границы квадрата
-                                opacity: 0.6, // прозрачность квадрата
-                                strokeWidth: 5, // толщина границы квадрата
-                                strokeStyle: 'solid' // тип границы квадрата
-                                }}
-                                onClick={() => this.polyginDetailBtn(this.state.polygons[0])}
-                            /> */}
-                        
+                        {/* итерация по полигонам для отрисовки каждого из них */}
                         {this.state.polygons.map(polygon =>
                             <div key={polygon.id}>
+                                {/* компонент полигона для отображения полигона на карте с заданнами настройками */}
                             <Polygon
                                 geometry={[[
                                     [polygon.y1, polygon.x1],
@@ -129,6 +118,7 @@ class VineyardMap extends React.Component {
                     </div>
                 </YMaps>
                 }
+                {/* загрузка компонента который отвечает за отрисовку бокового меню */}
             <PolygonDetail polygon={this.state.curPolygon}/>
             </div>
         )

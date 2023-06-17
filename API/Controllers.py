@@ -10,7 +10,7 @@ class BaseControllerInt(ABC):
     '''
 
     @abstractmethod
-    def create_polygons(self):
+    def create_polygons(self) -> dict:
         '''
         Создание полигона
         :return:
@@ -111,12 +111,18 @@ class AdminController(BaseController):
         Получение итоговых полигонов
         :return:
         '''
+        # иттерация по полигонам
         for key, value in self.polygons.items():
+            # передача словаря полигона в сущность PolygonAdminEnt
             polygon = {key: value}
             polygon_ent = PolygonAdminEnt(polygon=polygon)
+            # получение и запись погодных данных
             # polygon_ent.set_weather()
+            # получение и запись почвенных данных
             polygon_ent.set_soil()
+            # получение и запись скоринг
             polygon_ent.scored_polygons()
+        # сохранения полигонов на диск
         self.save_polygons()
 
 class ScinceController(BaseController):
@@ -137,12 +143,18 @@ class ScinceController(BaseController):
         Создание полигонов для обучения
         :return:
         '''
+        # иттерация по полигонам
         for key, value in self.polygons.items():
+            # передача словаря полигона в сущность PolygonAdminEnt
             polygon = {key: value}
             polygon_ent = PolygonScinceEnt(polygon=polygon, growing=self.growing)
+            # получение и запись погодных данных
             # polygon_ent.set_weather()
+            # получение и запись почвенных данных
             polygon_ent.set_soil()
+            # установка метки для полигона
             polygon_ent.train_polygons()
+        # сохранения полигонов на диск
         self.save_polygons()
 
-ScinceController().get_polygons()
+AdminController().get_polygons()
