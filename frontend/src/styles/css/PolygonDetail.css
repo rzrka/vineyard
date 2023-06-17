@@ -1,7 +1,8 @@
 .polygon-detail {
     position: fixed;
-    width: 25%;
-    height: 100vw;
+    min-width: 25%;
+    max-width: 50%;
+    height: 100%;
     top: 0;
     right: 0;
     transform: translateX(130%);
