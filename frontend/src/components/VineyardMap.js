@@ -58,7 +58,7 @@ class VineyardMap extends React.Component {
 
     load_data() {
         // отправка гет запрос на бэкенд приложения
-        axios.get('http://127.0.0.1:8000/polygons/')
+        axios.get('http://213.189.201.91:8000/polygons/')
         .then(response => {
             // при успешном запросе, ответ отправляется в метод для сохранения наборов
             this.setData(response.data)
